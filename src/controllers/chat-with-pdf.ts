@@ -1,10 +1,15 @@
 import { Request, Response } from "express";
 import { QdrantVectorStore } from "@langchain/qdrant";
-import { embedder } from "./upload-pdf";
 import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
+});
+
+const embedder = new GoogleGenerativeAIEmbeddings({
+  apiKey: process.env.GEMINI_API_KEY,
+  model: "text-embedding-004",
 });
 
 export const chatWithPdf = async (req: Request, res: Response) => {
