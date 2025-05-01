@@ -1,0 +1,38 @@
+{
+  "name": "pdf-chat-rag-api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev:worker": "ts-node-dev --respawn --transpile-only src/worker.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google/genai": "^0.10.0",
+    "@google/generative-ai": "^0.24.0",
+    "@langchain/community": "^0.3.41",
+    "@langchain/core": "^0.3.47",
+    "@langchain/google-genai": "^0.2.4",
+    "@langchain/qdrant": "^0.1.2",
+    "@qdrant/js-client-rest": "^1.14.0",
+    "bullmq": "^5.49.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "multer": "^1.4.5-lts.2",
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/multer": "^1.4.12",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  }
+}
