@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { QdrantVectorStore } from "@langchain/qdrant";
 import { GoogleGenAI } from "@google/genai";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import fs from "fs/promises";
+import path from "path";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -41,6 +43,16 @@ export const chatWithPdf = async (req: Request, res: Response) => {
     });
 
     res.status(200).json({ success: true, data: response.text });
+  } catch (error: any) {
+    console.log("error >>>", error);
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
+
+export const getPdfFiles = async (req: Request, res: Response) => {
+  try {
+    const pdfFiles = await fs.readdir(path.join(__dirname, "../../uploads"));
+    res.status(200).json({ success: true, data: pdfFiles });
   } catch (error: any) {
     console.log("error >>>", error);
     res.status(400).json({ success: false, error: error.message });

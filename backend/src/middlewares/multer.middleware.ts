@@ -43,7 +43,7 @@ const uploadPdfFileMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  const upload = configPdfUpload().single("pdf");
+  const upload = configPdfUpload().single("file");
   upload(req, res, (err) => {
     if (err) {
       console.error("Upload error:", err);
