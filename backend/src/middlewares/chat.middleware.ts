@@ -2,6 +2,7 @@ import { QdrantClient } from "@qdrant/js-client-rest";
 import { Request, Response, NextFunction } from "express";
 import path from "path";
 import fs from "fs";
+import File from "../models/File.model";
 
 export const pdfExistsMiddleware = async (
   req: Request,
@@ -9,14 +10,21 @@ export const pdfExistsMiddleware = async (
   next: NextFunction
 ) => {
   try {
-    const { pdfName } = req.body;
+    console.log("fileId >>>", req.body);
+    const { fileId } = req.body;
 
-    if (!pdfName) {
-      throw new Error("PDF name is required");
+    if (!fileId) {
+      throw new Error("File ID is required");
+    }
+
+    const file = await File.findById(fileId);
+
+    if (!file) {
+      throw new Error("File not found");
     }
 
     const uploadDir = path.join(__dirname, "../../uploads");
-    const filePath = path.join(uploadDir, pdfName);
+    const filePath = path.join(uploadDir, file.name);
 
     if (!fs.existsSync(filePath)) {
       throw new Error("PDF not found");
@@ -26,7 +34,7 @@ export const pdfExistsMiddleware = async (
       url: process.env.QDRANT_URL,
     });
 
-    const collectionExists = await qdrantClient.collectionExists(pdfName);
+    const collectionExists = await qdrantClient.collectionExists(file.name);
 
     if (!collectionExists.exists) {
       throw new Error("PDF not found");
@@ -36,7 +44,7 @@ export const pdfExistsMiddleware = async (
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      error: error.message
+      message: error.message
         ? error.message
         : "An error occurred while checking the PDF",
     });

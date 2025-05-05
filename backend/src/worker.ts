@@ -6,6 +6,8 @@ import { QdrantClient } from "@qdrant/js-client-rest";
 import { QdrantVectorStore } from "@langchain/qdrant";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import File from "./models/File.model";
+import dbConnection from "./utils/dbConnection";
 
 const textSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 1000,
@@ -21,8 +23,11 @@ const worker = new Worker(
   "file-upload-queue",
   async (job) => {
     if (job.name === "file-ready") {
-      const { path, fileName } = JSON.parse(job.data);
-
+      const { path, fileName, fileId } = JSON.parse(job.data);
+      const file = await File.findById(fileId);
+      if (!file) {
+        throw new Error("File not found");
+      }
       const loader = new PDFLoader(path);
       const docs = await loader.load();
 
@@ -43,6 +48,10 @@ const worker = new Worker(
         collectionName: fileName,
       });
 
+      await File.findByIdAndUpdate(fileId, {
+        isUploaded: true,
+      });
+
       return { success: true, message: "PDF uploaded successfully" };
     }
   },
@@ -55,6 +64,7 @@ const worker = new Worker(
 );
 
 worker.on("ready", () => {
+  dbConnection();
   console.log("Worker is ready");
 });
 
@@ -66,4 +76,8 @@ worker.on("completed", (jobId, result) => {
 
 worker.on("failed", (jobId, error) => {
   console.log(`Job ${jobId} failed with error ${JSON.stringify(error)}`);
+});
+
+worker.on("error", (error) => {
+  console.log(`Worker error: ${JSON.stringify(error)}`);
 });

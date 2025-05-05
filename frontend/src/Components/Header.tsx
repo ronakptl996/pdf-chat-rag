@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
 const Header = ({
   setIsModalOpen,
@@ -10,7 +12,7 @@ const Header = ({
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
-
+  const navigate = useNavigate();
   const handleDragOver = async (
     e: React.DragEvent<HTMLDivElement>,
     value: boolean
@@ -54,8 +56,19 @@ const Header = ({
       formData.append("file", file!);
       const response = await fetch("http://localhost:3000/upload-pdf", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: formData,
       });
+
+      if (response.status === 401) {
+        toast.error("Unauthorized");
+        localStorage.removeItem("token");
+        navigate("/login");
+        return;
+      }
+
       const data = await response.json();
       console.log(data);
       setUploading(false);
@@ -165,7 +178,7 @@ const Header = ({
         </div>
       )}
 
-      <div className="flex justify-between items-center p-4 bg-gray-100">
+      <div className="flex justify-between items-center bg-gray-100 h-[70px] px-4">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-bold">Header</h1>
         </div>
